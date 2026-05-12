@@ -1,161 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Birthday Treasure Hunt 🎉</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Treasure Hunt</title>
 
-  <style>
-    :root {
-      --bg: #fef3f8;
-      --card: #ffffff;
-      --text: #222222;
-      --button: #ff69b4;
-      --button-text: #ffffff;
-      --border: #dddddd;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #121212;
-        --card: #1e1e1e;
-        --text: #f1f1f1;
-        --button: #ff69b4;
-        --button-text: #000000;
-        --border: #333333;
-      }
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .container {
-      background: var(--card);
-      padding: 24px;
-      border-radius: 14px;
-      width: 90%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    }
-
-    h1 {
-      margin-bottom: 12px;
-    }
-
-    #clue {
-      font-size: 16px;
-      margin-bottom: 18px;
-    }
-
-    input {
-      padding: 12px;
-      width: 100%;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text);
-      box-sizing: border-box;
-    }
-
-    button {
-      margin-top: 12px;
-      padding: 12px;
-      width: 100%;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background: var(--button);
-      color: var(--button-text);
-      cursor: pointer;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    #message {
-      margin-top: 14px;
-      font-weight: bold;
-      min-height: 20px;
-    }
-  </style>
+<style>
+:root {
+  --bg:#ffffff; --text:#111; --card:#f3f4f6;
+  --btn:#2563eb; --error:#dc2626; --hint:#047857;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#0f172a; --text:#e5e7eb; --card:#1e293b;
+    --btn:#3b82f6; --error:#f87171; --hint:#34d399;
+  }
+}
+body {
+  margin:0; min-height:100vh;
+  display:flex; justify-content:center; align-items:center;
+  background:var(--bg); color:var(--text);
+  font-family:system-ui, sans-serif; padding:16px;
+}
+.card {
+  width:100%; max-width:420px;
+  background:var(--card); padding:22px;
+  border-radius:16px; text-align:center;
+  box-shadow:0 20px 45px rgba(0,0,0,.2);
+}
+input, button {
+  width:100%; padding:12px; margin-top:12px;
+  border-radius:10px; border:none; font-size:1rem;
+}
+button { background:var(--btn); color:white; cursor:pointer; }
+button.secondary {
+  background:transparent; border:1px solid var(--btn); color:var(--btn);
+}
+.message { margin-top:10px; font-size:.95rem; }
+.error { color:var(--error); }
+.hint { color:var(--hint); }
+.hidden { display:none; }
+.shake { animation:shake .35s; }
+@keyframes shake {
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  50%{transform:translateX(6px)}
+  75%{transform:translateX(-6px)}
+  100%{transform:translateX(0)}
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-  <h1>🎉 Birthday Treasure Hunt</h1>
+<div class="card" id="card">
+  <h2 id="title">🔐 Clue 1</h2>
   <p id="clue"></p>
 
-  <input
-    type="text"
-    id="answer"
-    placeholder="Type your answer..."
-    autocomplete="off"
-  />
+  <input id="input" placeholder="Enter answer">
+  <button onclick="check()">Submit</button>
+  <button class="secondary" onclick="hint()">Use Lifeline</button>
 
-  <button onclick="checkAnswer()">Submit</button>
-
-  <p id="message"></p>
+  <div id="msg" class="message error hidden">Wrong answer. Try again.</div>
+  <div id="hintMsg" class="message hint hidden"></div>
+  <div class="message">Lifelines left: <span id="lives">3</span></div>
 </div>
 
 <script>
-  let currentClue = 0;
+let level = 0;
+let lifelines = 3;
+let hintIndex = 0;
 
-  const clues = [
-    { question: "I’m cold inside but not outside, I guard your food with humming pride. What am I?", answer: "fridge" },
-    { question: "Unscramble the word: R R O M I R", answer: "mirror" },
-    { question: "I’m soft but I’m not for sleep. I hug you when you want to keep. What am I?", answer: "sofa" },
-    { question: "I open without a hinge and hide small secrets. What am I?", answer: "drawer" },
-    { question: "Find the place where your head rests before your feet.", answer: "pillow" },
-    { question: "I have stories but no voice. I take you far while standing still. What am I?", answer: "bookshelf" },
-    { question: "Go to the place where you wash your hands and check your face.", answer: "bathroom" },
-    { question: "I have legs but I don’t walk. Meals and work happen here. What am I?", answer: "table" },
-    { question: "I’m in the kitchen. Not the fridge, not the stove. I hide snacks. What am I?", answer: "cabinet" },
-    { question: "FINAL CLUE 🎁 I guard your clothes and style. What am I?", answer: "wardrobe" }
-  ];
+const game = [
+{
+  clue:"I'm cold inside but not outside. I guard your food with humming pride.",
+  answer:"fridge",
+  hints:["It's in the kitchen","Keeps food fresh","Opens with a pull"]
+},
+{
+  clue:"Unscramble this word: R R O M I R",
+  answer:"mirror",
+  hints:["You already use it daily","You see yourself","It reflects"]
+},
+{
+  clue:"I wait for you when you're tired. You lie on me, dreams required.",
+  answer:"bed",
+  hints:["Bedroom item","You sleep here","Has pillows"]
+},
+{
+  clue:"I open with a pull, I hide your things. Not a door, but close to one.",
+  answer:"drawer",
+  hints:["Furniture part","Stores items","Slides out"]
+},
+{
+  clue:"Solve: 9 × 2 − 3",
+  answer:"15",
+  hints:["Multiply first","Then subtract","Two digits"]
+},
+{
+  clue:"I hold stories but cannot speak. I travel minds week to week.",
+  answer:"bookshelf",
+  hints:["Has many books","Wood or metal","In living room"]
+},
+{
+  clue:"People gather here to eat and talk. I stand still and never walk.",
+  answer:"table",
+  hints:["Furniture","Used daily","Flat surface"]
+},
+{
+  clue:"I tell time but make no sound. I hang or stand, always around.",
+  answer:"clock",
+  hints:["Shows hours","Has hands","Tick-tock"]
+},
+{
+  clue:"I'm in the kitchen, hot or cold. I help you cook what you'll hold.",
+  answer:"oven",
+  hints:["Kitchen appliance","Used for baking","Gets hot"]
+},
+{
+  clue:"I hold your clothes, neat and tall. Open me to find outfits for all.",
+  answer:"wardrobe",
+  hints:["Bedroom storage","Big cupboard","Has hangers"]
+}
+];
 
-  const clueEl = document.getElementById("clue");
-  const answerEl = document.getElementById("answer");
-  const messageEl = document.getElementById("message");
+function load() {
+  document.getElementById("title").innerText = `🔐 Clue ${level+1}`;
+  document.getElementById("clue").innerText = game[level].clue;
+  document.getElementById("input").value = "";
+  document.getElementById("msg").classList.add("hidden");
+  document.getElementById("hintMsg").classList.add("hidden");
+}
+load();
 
-  clueEl.innerText = clues[currentClue].question;
-
-  function checkAnswer() {
-    const user = answerEl.value.toLowerCase().trim();
-    const correct = clues[currentClue].answer;
-
-    if (user === correct) {
-      currentClue++;
-      answerEl.value = "";
-      messageEl.innerText = "Correct! 🎉";
-
-      if (currentClue < clues.length) {
-        clueEl.innerText = clues[currentClue].question;
-      } else {
-        clueEl.innerText = "🎊 SURPRISE!! Happy Birthday 💖 Your gift is waiting!";
-        answerEl.style.display = "none";
-      }
-    } else {
-      messageEl.innerText = "Try again 😄";
-    }
+function check() {
+  const val = input.value.trim().toLowerCase();
+  if (val === game[level].answer) {
+    level++;
+    hintIndex = 0;
+    if (level === game.length) {
+      document.body.innerHTML =
+      "<h1>🎉 SURPRISE 🎉<br>Happy Birthday!! 💖</h1>";
+    } else load();
+  } else {
+    msg.classList.remove("hidden");
+    card.classList.add("shake");
+    setTimeout(()=>card.classList.remove("shake"),350);
   }
+}
 
-  // Allow Enter key submission (mobile friendly)
-  answerEl.addEventListener("keypress", function (e) {
-    if (e.key === "Enter") {
-      checkAnswer();
-    }
-  });
+function hint() {
+  if (lifelines === 0) {
+    hintMsg.innerText = "No lifelines left.";
+    hintMsg.classList.remove("hidden");
+    return;
+  }
+  hintMsg.innerText = game[level].hints[hintIndex] || "No more hints for this clue.";
+  hintMsg.classList.remove("hidden");
+  hintIndex++;
+  lifelines--;
+  document.getElementById("lives").innerText = lifelines;
+}
 </script>
 
 </body>
