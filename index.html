@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Birthday Treasure Hunt 🎉</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg: #fef3f8;
+      --card: #ffffff;
+      --text: #222222;
+      --button: #ff69b4;
+      --button-text: #ffffff;
+      --border: #dddddd;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --card: #1e1e1e;
+        --text: #f1f1f1;
+        --button: #ff69b4;
+        --button-text: #000000;
+        --border: #333333;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: var(--card);
+      padding: 24px;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      margin-bottom: 12px;
+    }
+
+    #clue {
+      font-size: 16px;
+      margin-bottom: 18px;
+    }
+
+    input {
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--button);
+      color: var(--button-text);
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #message {
+      margin-top: 14px;
+      font-weight: bold;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎉 Birthday Treasure Hunt</h1>
+  <p id="clue"></p>
+
+  <input
+    type="text"
+    id="answer"
+    placeholder="Type your answer..."
+    autocomplete="off"
+  />
+
+  <button onclick="checkAnswer()">Submit</button>
+
+  <p id="message"></p>
+</div>
+
+<script>
+  let currentClue = 0;
+
+  const clues = [
+    { question: "I’m cold inside but not outside, I guard your food with humming pride. What am I?", answer: "fridge" },
+    { question: "Unscramble the word: R R O M I R", answer: "mirror" },
+    { question: "I’m soft but I’m not for sleep. I hug you when you want to keep. What am I?", answer: "sofa" },
+    { question: "I open without a hinge and hide small secrets. What am I?", answer: "drawer" },
+    { question: "Find the place where your head rests before your feet.", answer: "pillow" },
+    { question: "I have stories but no voice. I take you far while standing still. What am I?", answer: "bookshelf" },
+    { question: "Go to the place where you wash your hands and check your face.", answer: "bathroom" },
+    { question: "I have legs but I don’t walk. Meals and work happen here. What am I?", answer: "table" },
+    { question: "I’m in the kitchen. Not the fridge, not the stove. I hide snacks. What am I?", answer: "cabinet" },
+    { question: "FINAL CLUE 🎁 I guard your clothes and style. What am I?", answer: "wardrobe" }
+  ];
+
+  const clueEl = document.getElementById("clue");
+  const answerEl = document.getElementById("answer");
+  const messageEl = document.getElementById("message");
+
+  clueEl.innerText = clues[currentClue].question;
+
+  function checkAnswer() {
+    const user = answerEl.value.toLowerCase().trim();
+    const correct = clues[currentClue].answer;
+
+    if (user === correct) {
+      currentClue++;
+      answerEl.value = "";
+      messageEl.innerText = "Correct! 🎉";
+
+      if (currentClue < clues.length) {
+        clueEl.innerText = clues[currentClue].question;
+      } else {
+        clueEl.innerText = "🎊 SURPRISE!! Happy Birthday 💖 Your gift is waiting!";
+        answerEl.style.display = "none";
+      }
+    } else {
+      messageEl.innerText = "Try again 😄";
+    }
+  }
+
+  // Allow Enter key submission (mobile friendly)
+  answerEl.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      checkAnswer();
+    }
+  });
+</script>
+
+</body>
+</html>
